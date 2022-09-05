@@ -1,6 +1,13 @@
+using Hangfire;
+using Hangfire.MemoryStorage;
+using lab3;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddTransient<CurrencyService>();
+
+builder.Services.AddHangfire(x => x.UseMemoryStorage());
+builder.Services.AddHangfireServer();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -22,4 +29,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    BackgroundJob.Schedule<CurrencyService>(x => x.SendToGaAsync(), TimeSpan.FromSeconds(10));
+});
+
 app.Run();
+
