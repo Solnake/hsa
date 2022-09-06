@@ -6,9 +6,17 @@ namespace lab3;
 
 public class CurrencyService
 {
-    public Task SendToGaAsync()
+    private readonly GoogleAnalyticsApi _analytics;
+
+    public CurrencyService(GoogleAnalyticsApi analytics)
     {
-        return Task.CompletedTask;
+        _analytics = analytics;
+    }
+
+    public async Task SendToGaAsync()
+    {
+        var rate = GetRateAsync();
+        await _analytics.Track("currency", rate.ToString());
     }
 
     public async Task<decimal> GetRateAsync()
@@ -18,8 +26,8 @@ public class CurrencyService
         var rates = await JsonSerializer.DeserializeAsync<List<ChangeRate>>(response);
         return rates.Find(r => r.Currency.Equals("USD")).Rate;
     }
-    
-    class ChangeRate
+
+    private class ChangeRate
     {
         [JsonPropertyName("cc")]
         public string Currency { get; set; }
