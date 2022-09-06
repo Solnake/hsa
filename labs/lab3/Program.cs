@@ -35,7 +35,10 @@ app.MapControllers();
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
-    BackgroundJob.Schedule<CurrencyService>(x => x.SendToGaAsync(), TimeSpan.FromSeconds(5));
+    RecurringJob.AddOrUpdate<CurrencyService>(
+        "currency_update",
+        x => x.SendToGaAsync(),
+        Cron.Minutely);
 });
 
 app.Run();
